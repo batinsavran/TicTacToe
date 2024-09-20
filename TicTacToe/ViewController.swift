@@ -1,9 +1,8 @@
 import UIKit
 
-class ViewController: UIViewController
-{
-    enum Turn
-    {
+class ViewController: UIViewController {
+    
+    enum Turn {
         case Nought
         case Cross
     }
@@ -19,109 +18,69 @@ class ViewController: UIViewController
     @IBOutlet weak var c3: UIButton!
     @IBOutlet weak var turnLabel: UILabel!
     
-    
     var firstTurn = Turn.Cross
     var currentTurn = Turn.Cross
+    let NOUGHT = "O"
+    let CROSS = "X"
     
-    var NOUGHT = "O"
-    var CROSS = "X"
     var board = [UIButton]()
-    
     var noughtsScore = 0
     var crossesScore = 0
     
-    override func viewDidLoad()
-    {
+    override func viewDidLoad() {
         super.viewDidLoad()
         initBoard()
     }
     
-    func initBoard()
-    {
-        board.append(a1)
-        board.append(a2)
-        board.append(a3)
-        board.append(b1)
-        board.append(b2)
-        board.append(b3)
-        board.append(c1)
-        board.append(c2)
-        board.append(c3)
+    func initBoard() {
+        board = [a1, a2, a3, b1, b2, b3, c1, c2, c3]
     }
     
-    @IBAction func boardTapAction(_ sender: UIButton)
-    {
+    @IBAction func boardTapAction(_ sender: UIButton) {
         addToBoard(sender)
         
-        if  checkForVictory(CROSS){
+        if checkForVictory(CROSS) {
             crossesScore += 1
-            resultAlert(tittle: "Crosses Win!")
-        }
-        
-        if  checkForVictory(NOUGHT){
+            resultAlert(title: "Crosses Win!")
+        } else if checkForVictory(NOUGHT) {
             noughtsScore += 1
-            resultAlert(tittle: "Noughts Win!")
-        }
-        
-        if(fullBoard()) {
-            resultAlert(tittle: "Draw")
+            resultAlert(title: "Noughts Win!")
+        } else if fullBoard() {
+            resultAlert(title: "Draw")
         }
     }
     
-    func checkForVictory(_ s :String) -> Bool 
-    {
-        //Horizontal Victory
-        if thisSymbol(a1, s) && thisSymbol(a2, s) && thisSymbol(a3, s)
-        {
+    func checkForVictory(_ symbol: String) -> Bool {
+        // Horizontal Victory
+        if checkLine(a1, a2, a3, symbol) || checkLine(b1, b2, b3, symbol) || checkLine(c1, c2, c3, symbol) {
             return true
         }
-        if thisSymbol(b1, s) && thisSymbol(b2, s) && thisSymbol(b3, s)
-        {
+        // Vertical Victory
+        if checkLine(a1, b1, c1, symbol) || checkLine(a2, b2, c2, symbol) || checkLine(a3, b3, c3, symbol) {
             return true
         }
-        if thisSymbol(c1, s) && thisSymbol(c2, s) && thisSymbol(c3, s)
-        {
+        // Diagonal Victory
+        if checkLine(a1, b2, c3, symbol) || checkLine(a3, b2, c1, symbol) {
             return true
         }
-        
-        //Vertical Victory
-        if thisSymbol(a1, s) && thisSymbol(b1, s) && thisSymbol(c1, s)
-        {
-            return true
-        }
-        if thisSymbol(a2, s) && thisSymbol(b2, s) && thisSymbol(c2, s)
-        {
-            return true
-        }
-        if thisSymbol(a3, s) && thisSymbol(b3, s) && thisSymbol(c3, s)
-        {
-            return true
-        }
-        
-        //Diagonal Victory
-        if thisSymbol(a1, s) && thisSymbol(b2, s) && thisSymbol(c3, s)
-        {
-            return true
-        }
-        if thisSymbol(a3, s) && thisSymbol(b2, s) && thisSymbol(c1, s)
-        {
-            return true
-        }
-        
         return false
+    }
+    
+    func checkLine(_ button1: UIButton, _ button2: UIButton, _ button3: UIButton, _ symbol: String) -> Bool {
+        return thisSymbol(button1, symbol) && thisSymbol(button2, symbol) && thisSymbol(button3, symbol)
     }
     
     func thisSymbol(_ button: UIButton, _ symbol: String) -> Bool {
         return button.title(for: .normal) == symbol
     }
     
-    func resultAlert(tittle: String) {
-        let message = "\nNoughts " + String(noughtsScore) + "\n\nCrosses " + String(crossesScore)
-        let ac = UIAlertController(title: tittle, message: nil, preferredStyle: .actionSheet)
-        ac.addAction(UIAlertAction(title: "Reset", style: .default, handler: { (_) in
+    func resultAlert(title: String) {
+        let message = "\nNoughts: \(noughtsScore) \nCrosses: \(crossesScore)"
+        let ac = UIAlertController(title: title, message: message, preferredStyle: .actionSheet)
+        ac.addAction(UIAlertAction(title: "Reset", style: .default, handler: { _ in
             self.resetBoard()
         }))
-        self.present(ac, animated: true)
+        present(ac, animated: true)
     }
     
     func resetBoard() {
@@ -129,47 +88,28 @@ class ViewController: UIViewController
             button.setTitle(nil, for: .normal)
             button.isEnabled = true
         }
-        if firstTurn == Turn.Nought {
-            firstTurn = Turn.Cross
-            turnLabel.text = CROSS
-        }
-        else if firstTurn == Turn.Cross {
-            firstTurn = Turn.Nought
-            turnLabel.text = NOUGHT
-        }
+        firstTurn = (firstTurn == .Nought) ? .Cross : .Nought
+        turnLabel.text = (firstTurn == .Cross) ? CROSS : NOUGHT
         currentTurn = firstTurn
     }
     
     func fullBoard() -> Bool {
-        for button in board
-        {
-            if button.title(for: .normal) == nil
-            {
-                return false
-            }
-        }
-        return true
+        return !board.contains { $0.title(for: .normal) == nil }
     }
     
-    func addToBoard(_ sender: UIButton)
-    {
-        if sender.title(for: .normal) == nil
-        {
-            if (currentTurn==Turn.Nought)
-            {
-                sender.setTitle(NOUGHT, for: .normal)
-                currentTurn = Turn.Cross
-                turnLabel.text = CROSS
-            }
-            else if sender.title(for: .normal) == nil
-            {
-                sender.setTitle(CROSS, for: .normal)
-                currentTurn = Turn.Nought
-                turnLabel.text = NOUGHT
-            }
-            sender.isEnabled = false
+    func addToBoard(_ sender: UIButton) {
+        guard sender.title(for: .normal) == nil else { return }
+        
+        if currentTurn == .Nought {
+            sender.setTitle(NOUGHT, for: .normal)
+            currentTurn = .Cross
+            turnLabel.text = CROSS
+        } else {
+            sender.setTitle(CROSS, for: .normal)
+            currentTurn = .Nought
+            turnLabel.text = NOUGHT
         }
+        sender.isEnabled = false
     }
 }
-
 
