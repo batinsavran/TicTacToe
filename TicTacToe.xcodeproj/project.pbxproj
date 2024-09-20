@@ -85,6 +85,7 @@
 				7CEA67262C9D95380045BFFA /* Products */,
 			);
 			sourceTree = "<group>";
+			usesTabs = 0;
 		};
 		7CEA67262C9D95380045BFFA /* Products */ = {
 			isa = PBXGroup;
